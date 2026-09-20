@@ -89,7 +89,7 @@ export async function addFile(id: string): Promise<AddResult> {
       if ((asset.size ?? 0) > WEB_MAX_BYTES) {
         return {
           ok: false,
-          error: `Too large for browser storage (${Math.round((asset.size ?? 0) / 1e6)}MB > 2.5MB). The phone app has no such limit.`,
+          error: `Too large for browser storage (${Math.round((asset.size ?? 0) / 1e6)}MB > 2.5MB).`,
         };
       }
       // On web the picker returns a fetchable blob URI.

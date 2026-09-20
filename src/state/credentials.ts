@@ -122,8 +122,7 @@ export async function checkCanvas(
       ok: false,
       error:
         `Browsers can't call Canvas directly (it sends no CORS headers). ` +
-        `Start the helper with: npm run proxy  — expected at ${CANVAS_PROXY}. ` +
-        `On the phone app no proxy is needed.`,
+        `Start the helper with: npm run proxy  — expected at ${CANVAS_PROXY}.`,
     };
   }
 

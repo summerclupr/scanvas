@@ -47,7 +47,7 @@ export function icsFetchHint(icsUrl: string, err: unknown): string {
       `The browser blocked the calendar feed at "${host}", and that host is ` +
       `not one the local proxy forwards to. On the web build only published ` +
       `Outlook calendars (outlook.office.com / outlook.office365.com / ` +
-      `outlook.live.com) can be read; the phone build has no such limit.`
+      `outlook.live.com) can be read.`
     );
   }
   return (

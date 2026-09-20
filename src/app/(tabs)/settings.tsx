@@ -204,8 +204,8 @@ export default function SettingsScreen() {
             style={[input, { marginTop: 6 }]}
           />
           <T size={12} tone="faint" style={{ marginTop: 6 }}>
-            On a real phone this must be your laptop&apos;s LAN address, not
-            localhost. Start the server with OLLAMA_HOST=0.0.0.0 ollama serve
+            The default localhost works when Ollama runs on this machine. Start
+            it with: ollama serve
           </T>
 
           <T size={13} weight="600" tone="dim" style={{ marginTop: 14 }}>
@@ -519,8 +519,8 @@ export default function SettingsScreen() {
 
           <T size={12} tone="faint" style={{ marginTop: 10 }}>
             {Platform.OS === 'web'
-              ? 'In a browser nothing is actually queued: the web build has no way to schedule OS notifications, so the counts above describe what the phone app would fire. Open the app in Expo Go on a real device for reminders.'
-              : 'Simulators never deliver local notifications. Test on a real device.'}
+              ? 'In a browser nothing is queued: browsers cannot schedule system notifications, so the counts above describe the reminder plan your current settings produce.'
+              : 'Reminders are handed to the system notification scheduler.'}
           </T>
         </Card>
 

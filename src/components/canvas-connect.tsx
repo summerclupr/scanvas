@@ -88,8 +88,8 @@ export function CanvasConnect() {
           Your assignments, exams, and grades come from here. Disconnecting
           erases everything synced from this account and cancels its reminders.
           {SECURE_STORAGE_AVAILABLE
-            ? ' The token is in the device keychain.'
-            : ' On web the token is in localStorage — use the phone app for anything real.'}
+            ? ' The token is kept in the secure store.'
+            : " The token is kept in this browser's local storage."}
         </T>
         <Row gap={8}>
           <Button
