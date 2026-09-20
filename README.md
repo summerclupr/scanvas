@@ -4,9 +4,7 @@
 
 Scan + Canvas. A calendar that reads your Canvas, your Outlook, and MIT's
 public event feeds, and tells you two things: **what you owe**, and **the few
-things this week you'd actually want to go to**. (The design was called "Two
-Lanes" while it was being built; the two-lane split below is still the whole
-idea.) The mark lives in `assets/brand/` as SVG; `npm run brand` renders every
+things this week you'd actually want to go to**. The mark lives in `assets/brand/` as SVG; `npm run brand` renders every
 icon PNG from it.
 
 Everything runs on your device against a local model. No server, no account,
