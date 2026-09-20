@@ -2,45 +2,34 @@
 
 # Scanvas
 
-As an MIT student, don’t you get tired of jumping between countless apps and websites just to figure out what you need to do each week? Have you ever missed a deadline simply because your emails got drowned in dormspam or because you forgot to check Canvas?
+As an MIT student, do you ever get tired of jumping between countless apps and websites just to figure out what you need to do each week? Have you ever missed a deadline simply because your emails got drowned in dorm-spam or because you forgot to check Canvas?
 
 Introducing **Scanvas**, a local planner that keeps you on top of your workload while bringing together the opportunities, events, and information you care about. Your classes. Your assignments. Your opportunities. Your week. All in one place.
 
-The best part? Everything runs on your device using a local model. There is no need to create an account or link to an external server.
-
-> **Out of the box this app shows sample coursework, not yours.** Canvas and
-> Outlook start as recorded fixtures so the web app is runnable with zero setup,
-> and every screen says so in a banner until you connect a real account.
-> **Connect Canvas** (Settings → Accounts, ~2 minutes with a personal access
-> token) to see your actual psets, exams and grades. MIT campus listings
-> (talks, seminars, club events) are live from the start - they come from
-> public feeds and need no account.
+Scanvas runs entirely on your device using a local model. No account is required, and your data does not need to be sent to an external server.
 
 ---
 
 ## The idea
 
-The app has several tabs, starting with **Due** — shows your tasks that are due in chronological order, followed by **Plan**
-(suggests what to work on right now based on your priorities) and **Calendar** beside it that captures all of the deadlines and upcoming events in a more visual manner.
+The app is organized into several tabs, starting with **Due**, which shows your upcoming tasks, **Plan** which suggests what to work on right now based on your priorities, and **Calendar**, which provides a visual overview of deadlines and upcoming events.
 
-**Obligations** — psets, exams, project deadlines. These are *never*
-interest-filtered. You don't get to be uninterested in your 6.1210 midterm.
-They're ordered by urgency, and they always notify.
+Scanvas focuses on two main areas: **obligations**, such as psets, exams, and project deadlines, and **opportunities**, including club events, UROP postings, talks, and recruiting opportunities, filtered based on your interests and coursework.
 
-**Opportunities** — club events, UROP postings, talks, recruiting. MIT posts
-hundreds a week. These are filtered hard against what you said you cared
-about, and only a handful ever reach you.
 
-One list means a filter that's either too loose to help or too tight to trust.
-Two lanes means each half can be tuned for what it's actually for.
 
 ## What it does
 
 - Pulls from **Canvas** (assignments, quizzes, calendar, grade weights),
-  **Outlook** (calendar + mailing lists), and **MIT's public campus feeds**:
+  **Outlook** (calendar), and **MIT's public campus feeds**:
   the Institute events calendar (calendar.mit.edu, every department's talks,
   seminars, thesis defenses, career workshops and UROP mixers, with
   descriptions and categories) plus Engage's club-event iCal.
+> **Out of the box this app shows sample coursework, not yours.** Canvas and
+> Outlook start as recorded fixtures so the web app is runnable with zero setup,
+> and every screen says so in a banner until you connect a real account.
+> **Connect Canvas** (Settings → Accounts, ~2 minutes with a personal access
+> token) to see your actual psets, exams and grades.)
 - Reads the unstructured half — a colloquium buried in a `[csail-announce]`
   email, "tournament *Monday 7pm in 26-100*" on a club's website — with a
   local LLM, and turns it into real calendar entries.
