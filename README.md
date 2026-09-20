@@ -16,170 +16,128 @@ The app is organized into several tabs, starting with **Due**, which shows your 
 
 Scanvas focuses on two main areas: **obligations**, such as psets, exams, and project deadlines, and **opportunities**, including club events, UROP postings, talks, and recruiting opportunities, filtered based on your interests and coursework.
 
-
-
-## What it does
-
-- Pulls from **Canvas** (assignments, quizzes, calendar, grade weights),
-  **Outlook** (calendar), and **MIT's public campus feeds**:
-  the Institute events calendar (calendar.mit.edu, every department's talks,
-  seminars, thesis defenses, career workshops and UROP mixers, with
-  descriptions and categories) plus Engage's club-event iCal.
 > **Out of the box this app shows sample coursework, not yours.** Canvas and
 > Outlook start as recorded fixtures so the web app is runnable with zero setup,
 > and every screen says so in a banner until you connect a real account.
 > **Connect Canvas** (Settings → Accounts, ~2 minutes with a personal access
-> token) to see your actual psets, exams and grades.)
-- Reads the unstructured half — a colloquium buried in a `[csail-announce]`
-  email, "tournament *Monday 7pm in 26-100*" on a club's website — with a
-  local LLM, and turns it into real calendar entries.
-- Asks you at setup what you prioritize (UROPs? club events? talks?), which
-  fields, which professors and labs.
-- Ranks opportunities semantically, so "machine learning" surfaces a talk on
-  *foundation models for robot manipulation* even though they share no keyword.
-- Schedules local notifications, with **every lead time editable** — exams,
-  assignments, and events each get their own set, plus quiet hours, a morning
-  digest, and how good an event has to be before it's allowed to interrupt you.
-  Settings shows a live count of what the current setup would fire, and changes
-  reschedule immediately without re-running a sync.
-- A **Plan tab** that plans ahead: work is scheduled to **finish the day
-  before it's due**, so a pset due tomorrow at 11:59pm shows up today, and
-  each day card lists what's actually **due** that day alongside the work
-  planned for it. Tick a session when it's done and its hours come off the
-  estimate; leave it unticked and it rolls forward to the next day. Within a
-  day, items are ordered by `urgency x stakes x your priorities`.
-  **Saved applications are planned too**: save an internship or a research
-  program and its work starts today ("Work on application: Citadel — Quant
-  Intern") and ends with "Submit" on the closing day, which also lands on
-  the calendar and in Due; a rolling posting with no deadline gets a
-  self-set target ten days out, labelled as yours. Unsave it and all of that
-  disappears. Applications are floored at 0.4 urgency while open (rolling
-  postings fill as they go), and one closing months out still gets its work
-  placed this week with the closing date on the row - before that, "Internships
-  first" changed nothing because a posting ten days out scored 0.05 urgency. **The presets add things, not just reorder them**
-  (`src/plan/suggest.ts`): *Get me out of my room* suggests up to three
-  matching club, social and talk events per day; *Internships first* adds
-  application prompts across the week from postings you follow or that fit,
-  each one tap from becoming planned work; *Balanced* offers one strong
-  event match a day; *Grades first* adds nothing. Suggestions never count
-  against the day's hour budget.
-  Stakes for coursework is the **real share of your final grade**, computed
-  from Canvas assignment-group weights — so a 100-point lab in a 60%-weighted
-  group is 12% of your grade, not "100 points", and a small quiz can
-  correctly outrank a big pset. Pick a preset (**Grades first / Balanced /
-  Internships first / Get me out of my room**) and the order genuinely
-  changes; an exam inside 24 hours pins to the top regardless, because that
-  isn't a tradeoff anyone is really making. It also estimates effort and
-  warns when a day physically doesn't fit.
-- A **Calendar tab** with month and week zoom and arrow navigation across
-  periods. It carries all coursework due dates, **your class schedule**
-  (lectures, recitations, office hours — toggleable, since a heavy load can
-  crowd out deadlines), anything you added yourself, and **only the campus
-  events and internships you saved** — an unfiltered calendar of 4,400
-  internships is wallpaper. Colour-coded dots per day, tap a day for detail.
-- **Add your own repeating events** — club meetings, practices, standing
-  commitments. Stored as a repeating rule (weekly / biweekly / daily, any set
-  of weekdays, optional end date) rather than a pile of rows, so editing the
-  series edits every occurrence. Reminders are **off by default**: a standing
-  weekly meeting shouldn't push a notification alongside your real deadlines.
-- A **For you tab** with a search bar and two halves. **Events**: talks,
-  research events, club events, social events, career workshops and
-  deadlines from MIT's public calendars, ranked against your interests, one
-  filter chip per kind with live counts, plus the curated research programs
-  (UROP funding, MSRP, REU) under Research. **Professors**: 74 MIT faculty
-  matched to your interests, classes and follows, viewable as a ranked list
-  or **grouped by lab** — department, lab, what they work on, **what they're
-  teaching this term** (live from MIT's subject listing via Hydrant, matched
-  on surname plus initial), what they've taught, and contact links.
-  Contact details are never fabricated: every homepage and department page
-  is verified to resolve (`npm run verify:profs`), an email appears **only**
-  when the professor publishes it in plain text on their own page (22 of 74
-  do), and LinkedIn/Scholar are explicit *searches* rather than guessed
-  profile URLs.
-- **Search** across MIT from that same box. The query is read for intent
-  first (`src/search/intent.ts`) - a **name** ("max tegmark", "tegmark",
-  "m. tegmark"), a **department** ("professors in the philosophy
-  department", "eecs faculty"), a **research topic** ("professors doing
-  research in automatic speech recognition") or anything else - and each
-  kind fans out to the sources that can answer it:
-  - **People**: the checked faculty set; every instructor in this term's
-    subject listing (Hydrant); and **OpenAlex**, the public index of
-    scholarly publications, filtered to authors whose latest papers are
-    from MIT. By name it returns the person with their research topics; by
-    topic it maps the phrase onto OpenAlex's taxonomy ("Speech Recognition
-    and Synthesis") and lists the most-published MIT authors under it. Cards
-    say plainly that OpenAlex includes students and postdocs and carries no
-    email, and link to the OpenAlex/ORCID record plus MIT's own lookups.
-  - **Departments**: everyone teaching a class with that department's
-    course prefix this term, the department's website (from the calendar's
-    directory), and an MIT search for its faculty list.
-  - **Courses**: 2,300 classes with number, title, instructor and catalogue
-    description, from hydrant.mit.edu; add one to your class list from the
-    card.
-  - **Clubs**: groups hosting a synced event (Engage names the club on every
-    event), then **Engage's own directory of all ~514 recognised groups**,
-    searched live - name, ASA category, website, mission, officers - with a
-    Follow button that ranks their events first. Plus the ~200 groups and
-    ~100 labs that post to calendar.mit.edu.
-  - **Events**: what's synced, then a live full-text search of the Institute
-    calendar three months out.
-  Filler is ignored ("mit poker club" needs only "poker" to match), every
-  remaining word has to match ("max tegmark" is one person, not everything
-  containing "maximum"), and a name nobody matches gets a card saying so
-  with MIT directory, MIT site search, Scholar and LinkedIn lookups rather
-  than a guessed page. Sources that can't be reached are named rather than
-  silently omitted (`src/search/`).
-- **The feed is strict about "for you."** Events are shown in three tiers:
-  *For you* (something you said matched - a field, a person or club you
-  follow, a keyword, a class - or a category you ranked Priority), *In case
-  you're curious* (only a category you'd rank "Sometimes" matched; at most
-  three, labelled), and *filtered out* (one tap away). Events the MIT
-  calendar tags for faculty, staff or alumni only, or whose text says they're
-  for graduate students when you're an undergraduate, are penalised
-  ("Aimed at …" appears in the score breakdown). **"Not for me" learns**:
-  it hides the host and the recurring series, offers to hide the whole theme
-  (the calendar's tag, e.g. Religious/Spiritual) with one more tap, and can
-  be undone; everything hidden this way is listed in Settings → Interests
-  with a chip to bring it back.
-- **Clubs you follow become a source.** Follow a club from a search result
-  and every sync reads that club's own Engage feed and its website
-  (`src/connectors/clubs.ts`): the site is stripped to text, cut into blocks
-  that mention a date or time, and handed to the local model exactly like a
-  mailing-list email, so a dated notice becomes an event and everything else
-  is dropped as not-an-event. The campus-wide Engage feed also gets its RSS
-  merged in, which carries the club name, topics, a real description and
-  whether food is provided. What this cannot read, said plainly: Instagram
-  (login wall, no public API), dormspam you haven't connected (connect
-  Outlook), or a club site that draws its events from a private database at
-  load time - the MIT Poker Club's does, and its Engage feed stopped in
-  2021, so its tournaments are only announced where we can't see them.
-- A **Careers tab**: ~4,400 live internships from the community-maintained
-  [SimplifyJobs feed](https://github.com/SimplifyJobs/Summer2026-Internships)
-  (real data, no account, CORS-friendly, cached with a 12h TTL) plus a curated
-  set of research programs (UROP funding, MSRP, REU, Lincoln Lab) with
-  deadlines and requirement bullets. Follow companies or labs and they float
-  to the top; save a posting with a deadline and it lands on your Due list and
-  in the notification plan as an obligation. Requirements are only ever shown
-  when the source carries them — nothing is generated. A documents card at the
-  top stores your resume and transcript on-device (copied into app storage on
-  phone; size-capped browser storage on web) for when an application asks.
-- Tracks **what you've handed in and what it scored** on a Work tab —
-  per-class points-weighted averages, late and missing flags, and a hard rule
-  that work awaiting a grade is never counted as a zero. **PE attendance**
-  points live here and only here: Canvas shows a graded "assignment" per PE
-  session, which is a grade but not homework, so it never appears in Due,
-  Plan, the calendar, or reminders (`src/core/attendance.ts`).
-- An **assistant** (floating button, runs on your Ollama) that answers from
-  a factual snapshot and changes settings through a closed set of typed
-  actions. Beyond the planning and interest actions, it can **mute a theme**
-  ("remove prayer nights from my interests" mutes prayer, worship, bible,
-  christian, fellowship at once, since one word never covers a theme),
-  **follow a club** so its events rank first, **hide an event**, and **run a
-  search** on the For you tab. Its snapshot includes the synced events that
-  match the words in your message, so "any poker club events?" is answered
-  from data - and if nothing matched it says so and searches instead of
-  guessing.
-- Shows its work. Every recommendation expands into the exact score breakdown.
+> token) to see your actual psets, exams and grades.
+
+## What it does
+
+- **Reads what you already have.** Canvas (assignments, quizzes, grade
+  weights), Outlook (calendar, and mailing lists if connected with a Graph
+  token), and MIT's public feeds: the
+  Institute events calendar, Engage's club events, and Hydrant for your class
+  times. Prose that no API structures — a colloquium buried in a
+  `[csail-announce]` email, "tournament *Monday 7pm in 26-100*" on a club's
+  site — goes through a local LLM that turns it into real calendar entries, or
+  drops it rather than guess a date.
+- **Asks what you care about**, then ranks semantically: "machine learning"
+  surfaces a talk on *foundation models for robot manipulation* despite
+  sharing no keyword.
+- **Plan** schedules work to **finish the day before it's due**, so a pset due
+  tomorrow at 11:59pm shows up today. Each day lists what's due, what's on your
+  schedule, and what to work on. Tick a session and its hours leave the
+  estimate; leave it and it rolls to tomorrow. Ordering is
+  `urgency × stakes × your priorities`, where stakes is your **real share of
+  the final grade** from Canvas group weights — a 100-point lab in a
+  60%-weighted group is 12% of your grade, not "100 points", so a small quiz
+  can correctly outrank a big pset. An exam inside 24 hours pins to the top
+  regardless. It estimates effort and warns when a day physically doesn't fit.
+- **Presets add work, not just reorder it** (`src/plan/suggest.ts`).
+  *Get me out of my room* suggests up to three matching club, social and talk
+  events a day; *Internships first* adds two application prompts a day across
+  the week, each one tap from becoming planned work; *Balanced* offers one
+  strong event match a day; *Grades first* adds nothing. Suggestions never
+  count against your hour budget.
+- **Saved applications become planned work.** Save an internship or research
+  program and it starts today ("Work on application: Citadel — Quant Intern"),
+  ends with "Submit" on the closing day, and appears in Due and on the
+  calendar. A rolling posting with no deadline gets a target ten days out,
+  labelled as yours. One closing months away still gets work placed this week.
+  Unsave it and all of that disappears.
+- **Notifications with every lead time editable** — exams, assignments and
+  events each get their own set, plus quiet hours, a morning digest, and how
+  good an event must be to interrupt you. Settings shows a live count of what
+  would fire, and edits reschedule without a re-sync.
+- **Calendar** with month and week zoom. Carries coursework, your class
+  schedule (toggleable, since a heavy load crowds out deadlines), your own
+  events, and the campus events and internships you saved — an unfiltered
+  calendar of 4,000 internships is wallpaper. Well-matched events you haven't
+  saved are one toggle away.
+- **Your own repeating events** — club meetings, practices — stored as a rule
+  (weekly / biweekly / daily, any weekdays, optional end date), so editing the
+  series edits every occurrence. Reminders off by default.
+- **For you** has two halves. *Events*: talks, research, club, social and
+  career events from MIT's public calendars, one filter chip per kind with
+  live counts, plus curated research programs (UROP funding, MSRP, REU) under
+  Research. *Professors*: 74 MIT faculty matched to your interests, classes
+  and follows, as a ranked list or **grouped by lab** — areas, courses taught,
+  and **what they're teaching this term**, live from MIT's subject listing.
+  Contact details are never fabricated: every homepage and department page is
+  checked to resolve (`npm run verify:profs`), an email appears **only** where
+  the professor publishes it on their own page (22 of 74 do), and
+  LinkedIn/Scholar are explicit *searches*, not guessed URLs.
+- **Search across MIT** from the same box. The query is read for intent first
+  (`src/search/intent.ts`) — a **name** ("max tegmark", "m. tegmark"), a
+  **department** ("professors in the philosophy department"), a **topic**
+  ("research in automatic speech recognition"), or anything else — and fans
+  out to the sources that can answer it:
+  - **People** — the checked faculty set, every instructor in this term's
+    subject listing, and **OpenAlex** filtered to authors publishing from MIT.
+    By name it returns the person with their research topics; by topic it maps
+    the phrase onto OpenAlex's taxonomy ("Speech Recognition and Synthesis")
+    and lists the most-published MIT authors under it. Cards say plainly that
+    OpenAlex includes students and postdocs and carries no email.
+  - **Departments** — everyone teaching that prefix this term, the
+    department's site, and an MIT search for its full faculty list.
+  - **Courses** — 2,273 classes with number, title, instructor and catalogue
+    description; add one to your class list from the card.
+  - **Clubs** — clubs hosting a synced event, then Engage's directory of all
+    514 recognised groups, searched live, with a Follow button. Plus the ~320
+    groups and ~240 labs and departments that post to calendar.mit.edu.
+  - **Events** — what's synced, then a live search of the Institute calendar
+    three months out.
+
+  Filler is ignored ("mit poker club" needs only "poker"), every remaining
+  word must match, and a name nobody matches gets a card saying so with real
+  MIT lookups rather than a guessed page. Unreachable sources are named.
+- **The feed is strict about "for you."** Three tiers: *For you* (a field,
+  person, club, keyword or class you named matched, or a category you ranked
+  Priority), *In case you're curious* (category only; at most three,
+  labelled), and *filtered out*, one tap away. Events tagged for faculty,
+  staff or alumni only — or written for graduate students when you're an
+  undergraduate — are penalised, with "Aimed at …" in the breakdown.
+  **"Not for me" learns**: it hides the host and the recurring series, offers
+  to hide the whole theme with one more tap, and is undoable from Settings.
+- **Clubs you follow become a source** (`src/connectors/clubs.ts`). Following
+  one makes every sync read its Engage feed and its website: the site is cut
+  into blocks that mention a date, then read by the local model like any
+  email, so a dated notice becomes an event and everything else is dropped.
+  What this can't reach, plainly: Instagram (login wall), dormspam you haven't
+  connected (connect Outlook), and club sites that load events from a private
+  database — the MIT Poker Club's does, and its Engage feed stopped in 2021.
+- **Careers**: ~4,400 live internships from the community-maintained  [SimplifyJobs feed](https://github.com/SimplifyJobs/Summer2026-Internships)
+  (no account, cached 12h) plus curated research programs with deadlines and
+  requirements. Follow companies and they float up; save one and it becomes
+  planned work. Requirements appear only where the source carries them. A
+  documents card keeps your resume and transcript on-device.
+- **Work** tracks what you handed in and what it scored — points-weighted
+  averages, late and missing flags, and a hard rule that ungraded work is
+  never counted as a zero. **PE attendance** lives here and only here: Canvas
+  files a graded "assignment" per session, which is a grade but not homework,
+  so it never reaches Due, Plan, the calendar or reminders
+  (`src/core/attendance.ts`).
+- **An assistant** on your Ollama that answers from a factual snapshot and
+  acts through a closed set of typed actions: **mute a theme** ("remove prayer
+  nights from my interests" mutes prayer, worship, bible, christian and
+  fellowship at once, since one word never covers a theme), **follow a club**,
+  **hide an event**, **run a search**, and the planning and interest actions.
+  Its snapshot carries the synced events matching your words, so "any poker
+  club events?" is answered from data — or it says nothing matched and
+  searches, rather than guessing.
+- **Shows its work.** Every recommendation expands into its exact score
+  breakdown.
 
 ## Running it
 
@@ -343,6 +301,17 @@ nothing fits earlier. Each day card also lists what is *due* that day, so
 records its planned hours and subtracts them from the estimate on the next
 recompute; an unticked session is simply not subtracted, so it rolls forward.
 Ticked sessions stay on their day, struck through, so a tick can be undone.
+
+**Applications are floored at 0.4 urgency while open.** Urgency is a function
+of slack, and a posting ten days out with two hours of work has a slack of 120
+— 0.05 urgency, which no lane weight could lift above coursework. So
+"Internships first" reordered nothing measurable. Rolling postings fill as they
+go, which makes "start now" the right call regardless of the closing date; the
+floor encodes that, and the Grades-first preset's application weight was
+lowered from 0.4 to 0.3 so a far-off internship still can't edge out a
+6%-of-grade pset due in three days. Applications also fill forward from today
+rather than backward from the deadline, and one closing beyond the two-week
+horizon still gets its first week of work placed.
 
 Overdue *coursework* stays in the plan (late submission is usually possible).
 Overdue *events* drop out: you cannot retroactively attend a club meeting, and
