@@ -2,16 +2,14 @@
 
 # Scanvas
 
-Scan + Canvas. A calendar that reads your Canvas, your Outlook, and MIT's
-public event feeds, and tells you two things: **what you owe**, and **the few
-things this week you'd actually want to go to**. The mark lives in `assets/brand/` as SVG; `npm run brand` renders every
-icon PNG from it.
+As an MIT student, don’t you get tired of jumping between countless apps and websites just to figure out what you need to do each week? Have you ever missed a deadline simply because your emails got drowned in dormspam or because you forgot to check Canvas?
 
-Everything runs on your device against a local model. No server, no account,
-nothing uploaded.
+Introducing **Scanvas**, a local planner that keeps you on top of your workload while bringing together the opportunities, events, and information you care about. Your classes. Your assignments. Your opportunities. Your week. All in one place.
+
+The best part? Everything runs on your device using a local model. There is no need to create an account or link to an external server.
 
 > **Out of the box this app shows sample coursework, not yours.** Canvas and
-> Outlook start as recorded fixtures so the thing is runnable with zero setup,
+> Outlook start as recorded fixtures so the web app is runnable with zero setup,
 > and every screen says so in a banner until you connect a real account.
 > **Connect Canvas** (Settings → Accounts, ~2 minutes with a personal access
 > token) to see your actual psets, exams and grades. MIT campus listings
@@ -22,13 +20,8 @@ nothing uploaded.
 
 ## The idea
 
-Every campus aggregator fails the same way: it dumps everything into one list.
-You either drown in dormspam or you miss a pset. So this app never mixes them.
-
-The app opens on **Due** — what you owe, chronologically — with **Plan**
-(what to work on right now, prioritized) and **Calendar** beside it. Due and
-Plan deliberately coexist: same data, different questions. Underneath, the same
-two-lane split drives everything:
+The app has several tabs, starting with **Due** — shows your tasks that are due in chronological order, followed by **Plan**
+(suggests what to work on right now based on your priorities) and **Calendar** beside it that captures all of the deadlines and upcoming events in a more visual manner.
 
 **Obligations** — psets, exams, project deadlines. These are *never*
 interest-filtered. You don't get to be uninterested in your 6.1210 midterm.
