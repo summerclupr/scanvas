@@ -41,8 +41,8 @@ Two lanes means each half can be tuned for what it's actually for.
   the Institute events calendar (calendar.mit.edu, every department's talks,
   seminars, thesis defenses, career workshops and UROP mixers, with
   descriptions and categories) plus Engage's club-event iCal.
-- Reads the unstructured half — "hull layup *this saturday 10am–4pm*" in a
-  Slack channel, a colloquium buried in a `[csail-announce]` email — with a
+- Reads the unstructured half — a colloquium buried in a `[csail-announce]`
+  email, "tournament *Monday 7pm in 26-100*" on a club's website — with a
   local LLM, and turns it into real calendar entries.
 - Asks you at setup what you prioritize (UROPs? club events? talks?), which
   fields, which professors and labs.
@@ -236,9 +236,10 @@ npm run proxy           # CORS helper so the WEB build can reach Canvas
 ```
 connectors ──► partition ──┬──► structured  ─────────────────┐
 (canvas, outlook,          │    (has a real date already)     │
- mit campus)               │                                  ├──► dedupe ──► score ──► notify
+ mit campus, clubs)        │                                  ├──► dedupe ──► score ──► notify
                            └──► unstructured ──► local LLM ───┘
-                                (prose, Slack)    extraction
+                                (email prose,     extraction
+                                 club websites)
 ```
 
 **Structured items skip inference entirely.** A Canvas assignment already has
@@ -509,15 +510,6 @@ a daily driver. A permanent connection needs an Azure AD app registration
 with those two delegated scopes and a proper OAuth flow; the connector code
 doesn't change, only where the token comes from.
 
-**Slack** — Settings → Accounts → paste a user OAuth token (`xoxp-…`).
-Create a throwaway app at api.slack.com/apps (From scratch → pick your
-workspace), add **User Token Scopes** `channels:read` + `channels:history`,
-Install to Workspace, copy the User OAuth Token. Long-lived, ~3 minutes, one
-workspace per token. The app then reads every public channel you're a member
-of — channel discovery is automatic. Note Slack's CORS preflight rejects the
-`Authorization` header, so all Slack calls pass the token as form data; that's
-load-bearing, not a style choice.
-
 **MIT campus listings** need no account and are live from the first sync.
 There used to be an "MIT ELx" entry under Accounts with a live/sample toggle;
 it was removed because there is no ELx account to connect — the Experiential
@@ -560,7 +552,9 @@ still **not** searchable: the MIT people directory, whose old public lookup
 now redirects to a login-gated search.
 
 **Slack** was removed at the user's request. The connector, fixtures, and
-credential slot are gone rather than left dormant.
+credential slot are gone rather than left dormant — the only trace left is a
+migration that drops a stored `slack` source id on load
+(`src/state/storage.ts`), so an old profile still boots.
 
 One trap worth knowing if you add a connector: `canvas-transport` detects the
 browser via `typeof document`, **not** React Native's `Platform`. Importing
