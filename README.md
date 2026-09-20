@@ -30,7 +30,8 @@ Scanvas focuses on two main areas: **obligations**, such as psets, exams, and pr
   events, and Hydrant for your class times. Prose that no API structures — a
   colloquium buried in a `[csail-announce]` email, "tournament *Monday 7pm in
   26-100*" on a club's site — goes through a local LLM that turns it into real
-  calendar entries, each with a date it verified.
+  calendar entries, with the date resolved deterministically against the
+  clock.
 - **Asks what you care about**, then ranks semantically: "machine learning"
   surfaces a talk on *foundation models for robot manipulation* despite
   sharing no keyword.
@@ -58,9 +59,7 @@ Scanvas focuses on two main areas: **obligations**, such as psets, exams, and pr
 - **Notifications with every lead time editable** — exams, assignments and
   events each get their own set, plus quiet hours, a morning digest, and how
   good an event must be to interrupt you. Settings shows a live count of what
-  would fire, and edits reschedule without a re-sync. Reminders are delivered
-  by the phone app, and the queue stays within iOS's pending budget with
-  deadlines placed first.
+  would fire, and edits reschedule without a re-sync.
 - **Calendar** with month and week zoom. Carries coursework, your class
   schedule (toggleable, since a heavy load crowds out deadlines), your own
   events, and the campus events and internships you saved — an unfiltered
@@ -120,7 +119,7 @@ Scanvas focuses on two main areas: **obligations**, such as psets, exams, and pr
   (no account, cached 12h) plus curated research programs with deadlines and
   requirements. Follow companies and they float up; save one and it becomes
   planned work. Requirements come straight from the source. A documents card
-  keeps your resume and transcript on-device.
+  keeps your resume and transcript in local browser storage.
 - **Work** tracks what you handed in and what it scored — points-weighted
   averages, late and missing flags, and a hard rule that ungraded work is
   never counted as a zero. **PE attendance** lives here and only here: Canvas
@@ -147,30 +146,27 @@ and club websites are read for events too, and the assistant comes alive.
 
 ```bash
 npm install
-npm start          # then scan the QR with Expo Go
-npm run web        # or run it in a browser
+npm run web        # opens the site in your browser
 ```
 
-**2. In a browser, also run the bundled proxy** in a second terminal. Canvas,
-Outlook calendar links, Engage and club websites don't send CORS headers, and
-this forwards them with the right ones. The phone app talks to them directly.
+**2. Run the bundled proxy** in a second terminal. Canvas, Outlook calendar
+links, Engage and club websites don't send CORS headers, and this forwards
+them with the right ones.
 
 ```bash
 npm run proxy      # localhost:8788, found automatically by the web build
 ```
 
-**3. Start the local model.** The phone reaches your laptop over the network,
-so bind to all interfaces:
+**3. Start the local model.**
 
 ```bash
 ollama pull qwen3.5:9b
 ollama pull nomic-embed-text
-OLLAMA_HOST=0.0.0.0 ollama serve
+ollama serve
 ```
 
-On a phone, set the Ollama host in Settings to your laptop's LAN address
-(`http://192.168.x.x:11434`) and hit **Test connection**. In a browser the
-default `localhost` already works.
+The default host, `http://localhost:11434`, is already set in Settings; hit
+**Test connection** to confirm both models are available.
 
 ### Seeing the pipeline without the app
 
@@ -251,8 +247,7 @@ calibrate` re-measures it for any model you switch to.
 **Large caches live in IndexedDB on web.** Embeddings (~9MB for 600 vectors),
 the live internship list, the class catalogue and the groups directory are
 kept there, with no size ceiling to hit; the profile, events and sync
-bookkeeping stay in localStorage. Native builds use the device store for all
-of it.
+bookkeeping stay in localStorage.
 
 **Profile writes go through an eagerly-updated ref**, so tapping across a row
 of settings composes every change and each one lands in storage. `npm run
@@ -331,8 +326,8 @@ Four signals decide what surfaces, and the UI labels each one:
   common letter prefixes (CS, ECE, MATH) are covered for other schools.
 - **Resume.** Skills are widened into the domains postings actually name
   (`pytorch` → machine learning), since the feed carries titles and categories.
-  Extraction runs on your own Ollama and the resume text never leaves the
-  device.
+  Extraction runs on your own Ollama and the resume text never leaves your
+  machine.
 - **School.** Gates school-restricted curated programs (MIT UROP) and adds a
   "near your campus" boost.
 
@@ -360,7 +355,7 @@ src/
   search/       query intent, OpenAlex, Engage directory, calendar.mit.edu directories
   careers/      SimplifyJobs feed, curated programs, eligibility, faculty set
   chat/         the assistant's actions and prompt
-  notify/       notification planning (pure) and Expo scheduling
+  notify/       notification planning (pure) and scheduling
   state/        local persistence (IndexedDB on web) + app store
   components/   UI kit, cards, search results, brand
   app/          onboarding, Due / Plan / Calendar / For you / Careers / Work / Settings
@@ -380,8 +375,8 @@ replaying samples, with no rebuild.
 **Canvas** — Settings → Accounts. Paste your Canvas address and a personal
 access token (Canvas → Account → Settings → New Access Token). The app
 verifies it and shows your own name and course list before trusting it, then
-adopts your real enrollment as the tracked course list. The token is stored in
-the device keychain via `expo-secure-store`. In a browser, Canvas goes through
+adopts your real enrollment as the tracked course list. The token is kept in
+local browser storage. Canvas goes through
 the bundled proxy (`npm run proxy`), which binds to 127.0.0.1 only, forwards
 to Canvas, Outlook published-calendar hosts and `*.mit.edu`, and never logs
 the Authorization header. The connect screen tells you if it isn't running.
@@ -445,8 +440,8 @@ override where the printed initial differs from the name people use.
 is institution `I63966007`.
 
 A note for adding a connector: `canvas-transport` detects the browser via
-`typeof document` rather than React Native's `Platform`, which keeps every
-connector loadable from Node so the headless scripts keep working.
+`typeof document`, which keeps every connector loadable from Node so the
+headless scripts keep working.
 
 ### Data rules
 
