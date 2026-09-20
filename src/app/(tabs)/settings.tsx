@@ -7,11 +7,12 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { Alert, Platform, ScrollView, TextInput, View } from 'react-native';
+import { Platform, ScrollView, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button, Card, Chip, Divider, Row, SectionHeader, T, useTheme } from '@/components/kit';
 import { NotificationEditor } from '@/components/notify-editor';
+import { confirm, notice } from '@/components/dialog';
 import { Brand } from '@/components/logo';
 import { CoursePicker } from '@/components/course-picker';
 import { CanvasConnect } from '@/components/canvas-connect';
@@ -72,13 +73,13 @@ export default function SettingsScreen() {
     await setOllamaConfig({ ...ollamaConfig, host: host.trim(), chatModel: chatModel.trim() });
     const status = await checkOllama();
     setTesting(false);
-    Alert.alert(
+    notice(
       status.reachable ? 'Connected' : 'Not reachable',
       status.reachable
         ? status.missing.length
           ? `Server is up, but missing: ${status.missing.join(', ')}\n\nRun: ollama pull ${status.missing.join(' && ollama pull ')}`
           : 'Server is up and both models are available.'
-        : `${status.error ?? 'No response'}\n\nMake sure Ollama is running and reachable:\nOLLAMA_HOST=0.0.0.0 ollama serve`,
+        : `${status.error ?? 'No response'}\n\nMake sure Ollama is running: ollama serve`,
     );
   };
 
@@ -122,15 +123,13 @@ export default function SettingsScreen() {
     };
   }, [scored, profile.notify]);
 
-  const confirmReset = () => {
-    Alert.alert(
+  const confirmReset = async () => {
+    const ok = await confirm(
       'Erase everything?',
-      'Deletes your profile, all synced events, and every scheduled reminder from this device.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Erase', style: 'destructive', onPress: () => reset() },
-      ],
+      'Deletes your profile, connected accounts, all synced events, saved applications, uploaded documents and reminders from this browser. You will start over at onboarding.',
+      { confirmLabel: 'Erase', destructive: true },
     );
+    if (ok) await reset();
   };
 
   return (

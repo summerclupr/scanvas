@@ -27,6 +27,7 @@ import {
 } from '../connectors';
 import type { ConnectorCredentials } from '../connectors/types';
 import * as creds from './credentials';
+import { clearAllFiles } from './files';
 import { enrolledCourseCodes } from '../connectors/canvas';
 import type { InterestProfile } from '../core/profile';
 import { DEFAULT_PROFILE } from '../core/profile';
@@ -40,7 +41,7 @@ import {
   scoreAll,
   sortChronological,
 } from '../ranking/score';
-import { hasPermission, requestPermissions, syncSchedule } from '../notify/schedule';
+import { cancelAll, hasPermission, requestPermissions, syncSchedule } from '../notify/schedule';
 import { SIMPLIFY_TTL_MS, fetchSimplify } from '../careers/simplify';
 import { curatedPostings } from '../careers/curated';
 import { rankPostings, type RankedPosting } from '../careers/rank';
@@ -244,6 +245,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // Guards against a second sync starting while one is in flight (pull to
   // refresh is very easy to double-fire).
   const syncingRef = useRef(false);
+  /**
+   * Bumped by "Erase everything". A sync that started before the wipe checks
+   * it before every write, so its tail (rationales, reminders) cannot land
+   * in storage the user just emptied.
+   */
+  const generationRef = useRef(0);
 
   /**
    * Always-current profile, mirrored into a ref.
@@ -634,6 +641,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setProgress({ phase: 'fetching', message: 'Starting...' });
 
     setSyncError(null);
+    const generation = generationRef.current;
+    const stale = () => generationRef.current !== generation;
     try {
       const status = await checkOllama();
 
@@ -677,12 +686,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             result.events.map(embeddingText),
             'document',
           );
-          await store.saveEmbeddings(cacheRef.current.toJSON());
+          if (!stale()) await store.saveEmbeddings(cacheRef.current.toJSON());
         } catch {
           // Scoring degrades to priorities + keywords, which still works.
         }
       }
 
+      if (stale()) return;
       setEvents(result.events);
       setLastResult(result);
       await store.saveEvents(result.events);
@@ -716,11 +726,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         for (const [id, reason] of written) if (reason) next[id] = reason;
         // Drop rationales for events that no longer exist, so storage doesn't
         // grow forever across a semester of syncs.
+        if (stale()) return;
         setRationales(next);
         await store.saveRationales(next);
         for (const ev of fresh) if (next[ev.id]) ev.rationale = next[ev.id];
       }
 
+      if (stale()) return;
       const granted = await requestPermissions();
       if (granted && profile.notify.enabled) {
         const prev = await store.loadScheduled();
@@ -1213,10 +1225,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
+  /**
+   * Erase everything: storage, credentials, uploaded documents, queued
+   * reminders, and every piece of in-memory state - so the screens empty
+   * immediately rather than after the next reload.
+   */
   const reset = useCallback(async () => {
+    generationRef.current += 1;
     await store.resetAll();
     await creds.clearCredentials();
+    await clearAllFiles();
+    try {
+      await cancelAll();
+    } catch {
+      // No scheduler on this platform; nothing was queued.
+    }
     credentialsRef.current = {};
+    clubLookupRef.current = {};
     setCreds({});
     cacheRef.current = new EmbeddingCache();
     profileRef.current = DEFAULT_PROFILE;
@@ -1226,6 +1251,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setRationales({});
     setLastSync(null);
     setLastResult(null);
+    setPostings([]);
+    setSavedPostings([]);
+    setCareersFetchedAt(null);
+    setCatalogue(new Map());
+    setCatalogueTerm(null);
+    setDirectory({ groups: [], departments: [], fetchedAt: null });
+    setNotifications({ scheduled: 0, granted: false });
+    setPendingSearch(null);
   }, []);
 
   const value: AppState = {

@@ -164,3 +164,19 @@ export function formatSize(bytes: number): string {
   if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
+
+/** Everything the documents card stored, gone. Used by "Erase everything". */
+export async function clearAllFiles(): Promise<void> {
+  for (const f of await listFiles()) {
+    try {
+      await removeFile(f.id);
+    } catch {
+      // Best effort; the index is removed below regardless.
+    }
+  }
+  try {
+    await AsyncStorage.removeItem(INDEX_KEY);
+  } catch {
+    // Nothing stored.
+  }
+}

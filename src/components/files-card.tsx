@@ -7,7 +7,7 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { Alert, Platform, View } from 'react-native';
+import { Platform, View } from 'react-native';
 
 import {
   addFile,
@@ -18,6 +18,7 @@ import {
   type StoredFile,
 } from '../state/files';
 import { Chip, Divider, Row, T, useTheme } from './kit';
+import { confirm } from './dialog';
 
 const SLOTS: { id: string; label: string; hint: string }[] = [
   { id: 'resume', label: 'Resume', hint: 'The PDF you attach everywhere' },
@@ -49,18 +50,14 @@ export function FilesCard() {
     if (err) setError(err);
   };
 
-  const confirmRemove = (f: StoredFile) => {
-    Alert.alert(`Remove ${f.name}?`, 'Deletes the stored copy from this device.', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Remove',
-        style: 'destructive',
-        onPress: async () => {
-          await removeFile(f.id);
-          await reload();
-        },
-      },
-    ]);
+  const confirmRemove = async (f: StoredFile) => {
+    const ok = await confirm(`Remove ${f.name}?`, 'Deletes the stored copy.', {
+      confirmLabel: 'Remove',
+      destructive: true,
+    });
+    if (!ok) return;
+    await removeFile(f.id);
+    await reload();
   };
 
   const byId = (id: string) => files.find((f) => f.id === id);
