@@ -44,3 +44,6 @@ example
 
 # screenshot output from `npm run shots`
 /shots
+
+# Claude Code per-project settings (tooling, not part of the app)
+.claude/
