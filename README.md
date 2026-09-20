@@ -104,9 +104,9 @@ Scanvas focuses on two main areas: **obligations**, such as psets, exams, and pr
   word must match, and a name outside every source gets direct MIT directory,
   MIT search, Scholar and LinkedIn lookups.
 - **The feed is strict about "for you."** Three tiers: *For you* (a field,
-  person, club, keyword or class you named matched, or a category you ranked
-  Priority), *In case you're curious* (category only; at most three,
-  labelled), and *filtered out*, one tap away. Events aimed at faculty, staff,
+  person, club, keyword or class you named matched), *In case you're curious*
+  (category only: up to four per category you ranked Priority, two per
+  Sometimes, none for Skip, labelled), and *filtered out*, one tap away. Events aimed at faculty, staff,
   alumni or graduate students rank lower for an undergraduate, and the score
   breakdown says so. **"Not for me" learns**: it hides the host and the
   recurring series, offers to hide the whole theme with one more tap, and is

@@ -69,8 +69,15 @@ const KIND_FILTERS: { kind: EventKind; label: string }[] = [
 
 /** Below this score an event is filed under "filtered out" rather than shown. */
 const FLOOR = 0.12;
-/** How many "in case you're curious" events to show above the filtered-out fold. */
-const IN_CASE_LIMIT = 3;
+/**
+ * How many category-only events a kind may put on the "in case you're
+ * curious" shelf, by how you ranked that category.
+ */
+function inCaseCapFor(priority: number): number {
+  if (priority >= 0.9) return 4;
+  if (priority > 0.2) return 2;
+  return 0;
+}
 /** MIT calendar themes worth offering to hide wholesale after a "Not for me". */
 const THEMES = new Set([
   'religious/spiritual',
@@ -247,11 +254,13 @@ export default function FeedScreen() {
   }, [scored, profile.feedback]);
 
   /**
-   * Three tiers. FOR YOU: something you said matched - a field, a person or
-   * club you follow, a keyword, a class - or a category you ranked Priority.
-   * IN CASE: nothing matched beyond a category you'd rank "Sometimes"; a few
-   * of these are shown, labelled, so the tab isn't a wall of them. HIDDEN:
-   * the rest, one tap away.
+   * Three tiers. FOR YOU: something you actually said matched - a field, a
+   * person or club you follow, a keyword, a class. IN CASE: nothing matched
+   * beyond the category; how many of these are shown depends on how you
+   * ranked that category (Priority: four, Sometimes: two, Skip: none), so
+   * ranking everything Priority widens the "in case" shelf rather than
+   * promoting hundreds of unmatched events to "for you". HIDDEN: the rest,
+   * one tap away.
    */
   const { forYou, inCase, hidden, saved } = useMemo(() => {
     const byKind =
@@ -259,14 +268,25 @@ export default function FeedScreen() {
         ? opportunities
         : opportunities.filter((e) => e.kind === filter);
     const aboveFloor = byKind.filter((e) => e.score >= FLOOR);
-    const matched = aboveFloor.filter(
-      (e) => hasInterestSignal(e) || priorityWeightFor(profile, e.kind) >= 0.9,
-    );
-    const rest = aboveFloor.filter((e) => !matched.includes(e));
+    const matched = aboveFloor.filter(hasInterestSignal);
+    const taken = new Map<EventKind, number>();
+    const inCase: ScoredEvent[] = [];
+    const overflow: ScoredEvent[] = [];
+    for (const e of aboveFloor) {
+      if (hasInterestSignal(e)) continue;
+      const cap = inCaseCapFor(priorityWeightFor(profile, e.kind));
+      const n = taken.get(e.kind) ?? 0;
+      if (n < cap) {
+        inCase.push(e);
+        taken.set(e.kind, n + 1);
+      } else {
+        overflow.push(e);
+      }
+    }
     return {
       forYou: matched,
-      inCase: rest.slice(0, IN_CASE_LIMIT),
-      hidden: [...rest.slice(IN_CASE_LIMIT), ...byKind.filter((e) => e.score < FLOOR)],
+      inCase,
+      hidden: [...overflow, ...byKind.filter((e) => e.score < FLOOR)],
       saved: opportunities.filter((e) => profile.feedback.saved.includes(e.id)),
     };
   }, [opportunities, filter, profile]);
@@ -288,12 +308,23 @@ export default function FeedScreen() {
   const muteTheme = (theme: string) =>
     updateProfile({ keywords: { ...profile.keywords, exclude: [...new Set([...profile.keywords.exclude, theme])] } });
 
+  // Chip counts are what a kind filter would actually show: matched events
+  // plus that kind's "in case" shelf.
   const counts = useMemo(() => {
     const out = new Map<EventKind, number>();
+    const shelf = new Map<EventKind, number>();
     for (const e of opportunities) {
       if (e.score < FLOOR) continue;
-      if (!hasInterestSignal(e) && priorityWeightFor(profile, e.kind) < 0.9) continue;
-      out.set(e.kind, (out.get(e.kind) ?? 0) + 1);
+      if (hasInterestSignal(e)) {
+        out.set(e.kind, (out.get(e.kind) ?? 0) + 1);
+        continue;
+      }
+      const cap = inCaseCapFor(priorityWeightFor(profile, e.kind));
+      const n = shelf.get(e.kind) ?? 0;
+      if (n < cap) {
+        shelf.set(e.kind, n + 1);
+        out.set(e.kind, (out.get(e.kind) ?? 0) + 1);
+      }
     }
     return out;
   }, [opportunities, profile]);
@@ -699,7 +730,7 @@ export default function FeedScreen() {
                   <View>
                     <SectionHeader
                       title="In case you're curious"
-                      detail="Nothing you said matched these - only a category you rank. A few, not the lot. Not for me hides the host for good."
+                      detail="Nothing you said matched these, only a category you rank: four per Priority category, two per Sometimes. Not for me hides the host for good."
                     />
                     <View style={{ opacity: 0.8 }}>
                       {inCase.map((e) => (
