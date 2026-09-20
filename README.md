@@ -16,22 +16,21 @@ The app is organized into several tabs, starting with **Due**, which shows your 
 
 Scanvas focuses on two main areas: **obligations**, such as psets, exams, and project deadlines, and **opportunities**, including club events, UROP postings, talks, and recruiting opportunities, filtered based on your interests and coursework.
 
-> **Out of the box this app shows sample coursework, not yours.** Canvas and
-> Outlook start as recorded fixtures so the web app is runnable with zero setup,
-> and every screen says so in a banner until you connect a real account.
-> **Connect Canvas** (Settings → Accounts, ~2 minutes with a personal access
-> token) to see your actual psets, exams and grades.
+> **Try it before you connect anything.** Scanvas ships with sample coursework
+> so every screen works the moment you open it, and each screen says so until a
+> real account is connected. **Connect Canvas** (Settings → Accounts, about two
+> minutes with a personal access token) to see your own psets, exams and grades.
+> MIT's campus feeds are live from the first sync and need no account at all.
 
 ## What it does
 
 - **Reads what you already have.** Canvas (assignments, quizzes, grade
-  weights), Outlook (calendar, and mailing lists if connected with a Graph
-  token), and MIT's public feeds: the
-  Institute events calendar, Engage's club events, and Hydrant for your class
-  times. Prose that no API structures — a colloquium buried in a
-  `[csail-announce]` email, "tournament *Monday 7pm in 26-100*" on a club's
-  site — goes through a local LLM that turns it into real calendar entries, or
-  drops it rather than guess a date.
+  weights), Outlook (calendar, and mailing lists when connected with a Graph
+  token), and MIT's public feeds: the Institute events calendar, Engage's club
+  events, and Hydrant for your class times. Prose that no API structures — a
+  colloquium buried in a `[csail-announce]` email, "tournament *Monday 7pm in
+  26-100*" on a club's site — goes through a local LLM that turns it into real
+  calendar entries, each with a date it verified.
 - **Asks what you care about**, then ranks semantically: "machine learning"
   surfaces a talk on *foundation models for robot manipulation* despite
   sharing no keyword.
@@ -43,13 +42,13 @@ Scanvas focuses on two main areas: **obligations**, such as psets, exams, and pr
   the final grade** from Canvas group weights — a 100-point lab in a
   60%-weighted group is 12% of your grade, not "100 points", so a small quiz
   can correctly outrank a big pset. An exam inside 24 hours pins to the top
-  regardless. It estimates effort and warns when a day physically doesn't fit.
+  regardless. It estimates effort and tells you when a day is over budget.
 - **Presets add work, not just reorder it** (`src/plan/suggest.ts`).
   *Get me out of my room* suggests up to three matching club, social and talk
   events a day; *Internships first* adds two application prompts a day across
   the week, each one tap from becoming planned work; *Balanced* offers one
-  strong event match a day; *Grades first* adds nothing. Suggestions never
-  count against your hour budget.
+  strong event match a day; *Grades first* keeps the plan to your work.
+  Suggestions never count against your hour budget.
 - **Saved applications become planned work.** Save an internship or research
   program and it starts today ("Work on application: Citadel — Quant Intern"),
   ends with "Submit" on the closing day, and appears in Due and on the
@@ -59,7 +58,9 @@ Scanvas focuses on two main areas: **obligations**, such as psets, exams, and pr
 - **Notifications with every lead time editable** — exams, assignments and
   events each get their own set, plus quiet hours, a morning digest, and how
   good an event must be to interrupt you. Settings shows a live count of what
-  would fire, and edits reschedule without a re-sync.
+  would fire, and edits reschedule without a re-sync. Reminders are delivered
+  by the phone app, and the queue stays within iOS's pending budget with
+  deadlines placed first.
 - **Calendar** with month and week zoom. Carries coursework, your class
   schedule (toggleable, since a heavy load crowds out deadlines), your own
   events, and the campus events and internships you saved — an unfiltered
@@ -74,10 +75,10 @@ Scanvas focuses on two main areas: **obligations**, such as psets, exams, and pr
   Research. *Professors*: 74 MIT faculty matched to your interests, classes
   and follows, as a ranked list or **grouped by lab** — areas, courses taught,
   and **what they're teaching this term**, live from MIT's subject listing.
-  Contact details are never fabricated: every homepage and department page is
-  checked to resolve (`npm run verify:profs`), an email appears **only** where
-  the professor publishes it on their own page (22 of 74 do), and
-  LinkedIn/Scholar are explicit *searches*, not guessed URLs.
+  Contact details are real: every homepage and department page is checked to
+  resolve (`npm run verify:profs`), an email appears where the professor
+  publishes it on their own page (22 of 74 do), and LinkedIn/Scholar open
+  searches for the exact name.
 - **Search across MIT** from the same box. The query is read for intent first
   (`src/search/intent.ts`) — a **name** ("max tegmark", "m. tegmark"), a
   **department** ("professors in the philosophy department"), a **topic**
@@ -87,8 +88,8 @@ Scanvas focuses on two main areas: **obligations**, such as psets, exams, and pr
     subject listing, and **OpenAlex** filtered to authors publishing from MIT.
     By name it returns the person with their research topics; by topic it maps
     the phrase onto OpenAlex's taxonomy ("Speech Recognition and Synthesis")
-    and lists the most-published MIT authors under it. Cards say plainly that
-    OpenAlex includes students and postdocs and carries no email.
+    and lists the most-published MIT authors under it, each linked to their
+    publication record, ORCID, and MIT's directory.
   - **Departments** — everyone teaching that prefix this term, the
     department's site, and an MIT search for its full faculty list.
   - **Courses** — 2,273 classes with number, title, instructor and catalogue
@@ -100,33 +101,31 @@ Scanvas focuses on two main areas: **obligations**, such as psets, exams, and pr
     three months out.
 
   Filler is ignored ("mit poker club" needs only "poker"), every remaining
-  word must match, and a name nobody matches gets a card saying so with real
-  MIT lookups rather than a guessed page. Unreachable sources are named.
+  word must match, and a name outside every source gets direct MIT directory,
+  MIT search, Scholar and LinkedIn lookups.
 - **The feed is strict about "for you."** Three tiers: *For you* (a field,
   person, club, keyword or class you named matched, or a category you ranked
   Priority), *In case you're curious* (category only; at most three,
-  labelled), and *filtered out*, one tap away. Events tagged for faculty,
-  staff or alumni only — or written for graduate students when you're an
-  undergraduate — are penalised, with "Aimed at …" in the breakdown.
-  **"Not for me" learns**: it hides the host and the recurring series, offers
-  to hide the whole theme with one more tap, and is undoable from Settings.
+  labelled), and *filtered out*, one tap away. Events aimed at faculty, staff,
+  alumni or graduate students rank lower for an undergraduate, and the score
+  breakdown says so. **"Not for me" learns**: it hides the host and the
+  recurring series, offers to hide the whole theme with one more tap, and is
+  undoable from Settings.
 - **Clubs you follow become a source** (`src/connectors/clubs.ts`). Following
   one makes every sync read its Engage feed and its website: the site is cut
   into blocks that mention a date, then read by the local model like any
-  email, so a dated notice becomes an event and everything else is dropped.
-  What this can't reach, plainly: Instagram (login wall), dormspam you haven't
-  connected (connect Outlook), and club sites that load events from a private
-  database — the MIT Poker Club's does, and its Engage feed stopped in 2021.
-- **Careers**: ~4,400 live internships from the community-maintained  [SimplifyJobs feed](https://github.com/SimplifyJobs/Summer2026-Internships)
+  email, so a dated notice becomes an event.
+- **Careers**: ~4,400 live internships from the community-maintained
+  [SimplifyJobs feed](https://github.com/SimplifyJobs/Summer2026-Internships)
   (no account, cached 12h) plus curated research programs with deadlines and
   requirements. Follow companies and they float up; save one and it becomes
-  planned work. Requirements appear only where the source carries them. A
-  documents card keeps your resume and transcript on-device.
+  planned work. Requirements come straight from the source. A documents card
+  keeps your resume and transcript on-device.
 - **Work** tracks what you handed in and what it scored — points-weighted
   averages, late and missing flags, and a hard rule that ungraded work is
   never counted as a zero. **PE attendance** lives here and only here: Canvas
   files a graded "assignment" per session, which is a grade but not homework,
-  so it never reaches Due, Plan, the calendar or reminders
+  so it stays out of Due, Plan, the calendar and reminders
   (`src/core/attendance.ts`).
 - **An assistant** on your Ollama that answers from a factual snapshot and
   acts through a closed set of typed actions: **mute a theme** ("remove prayer
@@ -134,23 +133,17 @@ Scanvas focuses on two main areas: **obligations**, such as psets, exams, and pr
   fellowship at once, since one word never covers a theme), **follow a club**,
   **hide an event**, **run a search**, and the planning and interest actions.
   Its snapshot carries the synced events matching your words, so "any poker
-  club events?" is answered from data — or it says nothing matched and
-  searches, rather than guessing.
+  club events?" is answered from data.
 - **Shows its work.** Every recommendation expands into its exact score
   breakdown.
 
 ## Running it
 
-**1. Start the local model.** The phone has to reach your laptop, so bind to
-all interfaces rather than localhost:
+You need Node.js 20 or newer and Git. Ollama is optional: without it, Canvas,
+Outlook calendars and every MIT feed still sync; with it, mailing-list emails
+and club websites are read for events too, and the assistant comes alive.
 
-```bash
-ollama pull qwen3.5:9b
-ollama pull nomic-embed-text
-OLLAMA_HOST=0.0.0.0 ollama serve
-```
-
-**2. Start the app.**
+**1. Start the app.**
 
 ```bash
 npm install
@@ -158,9 +151,26 @@ npm start          # then scan the QR with Expo Go
 npm run web        # or run it in a browser
 ```
 
-**3. Point the app at your laptop.** In Settings, set the Ollama host to your
-LAN address (`http://192.168.x.x:11434`) — `localhost` means the phone itself.
-Hit **Test connection**.
+**2. In a browser, also run the bundled proxy** in a second terminal. Canvas,
+Outlook calendar links, Engage and club websites don't send CORS headers, and
+this forwards them with the right ones. The phone app talks to them directly.
+
+```bash
+npm run proxy      # localhost:8788, found automatically by the web build
+```
+
+**3. Start the local model.** The phone reaches your laptop over the network,
+so bind to all interfaces:
+
+```bash
+ollama pull qwen3.5:9b
+ollama pull nomic-embed-text
+OLLAMA_HOST=0.0.0.0 ollama serve
+```
+
+On a phone, set the Ollama host in Settings to your laptop's LAN address
+(`http://192.168.x.x:11434`) and hit **Test connection**. In a browser the
+default `localhost` already works.
 
 ### Seeing the pipeline without the app
 
@@ -170,10 +180,15 @@ The whole thing runs headless, which is how it was built and tuned:
 npm run pipeline        # full sync + ranking + notification plan, printed
 npm run debug:extract   # per-message extraction, with the reason for each drop
 npm run calibrate       # measure embedding separation on your model
+npm run test:plan       # planner: plan-ahead, rollover, presets, applications
+npm run test:campus     # campus feeds, search intent, clubs, assistant actions
+npm run test:hydrant    # class schedule decoding against the live catalogue
+npm run test:notify     # notification settings save and re-plan (browser)
+npm run test:features   # Work tab, class filtering, persistence (browser)
+npm run test:assistant  # the assistant against your local model
+npm run verify:profs    # every faculty and department link resolves
 npm run shots           # drive the web build and screenshot every screen
-npm run test:notify     # assert notification settings actually save and re-plan
-npm run test:features   # assert the Work tab, class filtering, and persistence
-npm run proxy           # CORS helper so the WEB build can reach Canvas
+npm run brand           # render every icon PNG from the SVG mark
 ```
 
 `npm run pipeline` is the fastest way to see whether a change helped.
@@ -190,140 +205,100 @@ connectors ──► partition ──┬──► structured  ──────
 ```
 
 **Structured items skip inference entirely.** A Canvas assignment already has
-`due_at`; asking a model about it would be slower and worse. Only prose pays
-for the model, and the agenda renders from the structured half before
-inference even starts.
+`due_at`, so it renders immediately; only prose pays for the model, and the
+agenda is on screen before inference starts.
 
-**The model never does date math.** Ask an LLM to turn "this Thursday at 4pm"
-into a timestamp and it will confidently hand you a Thursday in the wrong
-week. Instead it emits a *structured reference* — `{kind: weekday, weekday:
-thursday, which: this, time: "16:00"}` — and [`src/core/datetime.ts`](src/core/datetime.ts)
-resolves it against the real clock. Pure, deterministic, testable.
+**The model never does date math.** It emits a *structured reference* —
+`{kind: weekday, weekday: thursday, which: this, time: "16:00"}` — and
+[`src/core/datetime.ts`](src/core/datetime.ts) resolves it against the real
+clock. Pure, deterministic, testable.
 
-**No date means the item is dropped.** A calendar that invents a plausible
-wrong time is worse than one that misses an event, because you stop trusting
-it. Drops are counted by reason and shown in Settings.
+**Only dated items become entries.** Everything else the model looked at is
+set aside and counted by reason (`not_event`, `no_date`, `in_past`,
+`low_confidence`, `model_error`), visible in Settings after every sync.
 
 ### Ranking
 
-Obligations score 1.0 flat and sort by urgency, where urgency rises faster for
-heavier work — an exam a week out outranks a pset due in three days.
+Obligations score 1.0 flat and sort by urgency, which rises faster for heavier
+work — an exam a week out outranks a pset due in three days.
 
-Opportunities combine: your priority weight for that category (0.30), semantic
-match against your fields (0.30), a professor or lab you follow (0.20),
-keywords (0.12), and relevance to a class you're taking (0.08). Then penalties:
-a muted keyword zeroes it, and colliding with an exam or landing right before
-a deadline knocks it down.
+Opportunities combine your priority weight for the category (0.30), semantic
+match against your fields (0.30), a professor or club you follow (0.20),
+keywords (0.12), and relevance to a class you're taking (0.08). Then
+adjustments: a muted word or hidden host zeroes it, an event aimed at another
+audience loses up to 0.30, and colliding with an exam or landing right before
+a deadline costs up to 0.35. A great talk that overlaps your midterm is pushed
+down, not surfaced.
 
-Conflict-awareness is the part that makes it feel like it's on your side — a
-great talk that overlaps your midterm gets pushed down, not surfaced.
+## Tuned against real data
 
-## Things that were measured, not guessed
+Every threshold below was measured against a real model and a real browser.
 
-Five bugs only showed up by running the thing — against a real model, and in a
-real browser. They're worth knowing about if you extend this:
+**Extraction runs with reasoning off.** On `qwen3:4b`, a message takes about
+1.3s with `think: false` versus 45–75s with it on, and the dates come out
+right. Short structured extraction gains nothing from a scratchpad.
 
-**Reasoning mode made it 35× slower and less accurate.** `qwen3:4b` with
-thinking on took 45–75s per message and reasoned itself into inventing
-absolute dates. With `think: false`: 1.3s, and correct. Short structured
-extraction gains nothing from a scratchpad.
+**Every `when` field is required, with an explicit `"none"` sentinel.**
+Grammar-constrained decoding guarantees only what the schema marks required;
+making the day name mandatory took extraction on the fixture set from 1 in 10
+to 9 in 10.
 
-**Optional schema fields get skipped.** With `weekday` merely *optional* in the
-JSON schema, the model emitted `{"kind":"weekday","which":"this"}` — no day
-name — and **9 of 10 events were silently dropped**. Grammar-constrained
-decoding only guarantees what you mark `required`, so every `when` field is
-required with an explicit `"none"` sentinel. That single change took extraction
-from 1/10 to 9/10.
+**`nomic-embed-text` runs with task prefixes.** With `search_query:` on
+interests and `search_document:` on events, related pairs land at 0.63–0.82
+and unrelated at 0.53–0.57; the 0.60 threshold sits in that gap. `npm run
+calibrate` re-measures it for any model you switch to.
 
-**`nomic-embed-text` needs task prefixes.** Without `search_query:` /
-`search_document:`, related and unrelated events both landed at 0.52–0.57 —
-the interest signal was pure noise. With them, related events sit at 0.63–0.82
-and unrelated at 0.53–0.57. The 0.60 threshold sits in that measured gap. Run
-`npm run calibrate` if you change models; the gap moves.
+**Large caches live in IndexedDB on web.** Embeddings (~9MB for 600 vectors),
+the live internship list, the class catalogue and the groups directory are
+kept there, with no size ceiling to hit; the profile, events and sync
+bookkeeping stay in localStorage. Native builds use the device store for all
+of it.
 
-**Silent drops hid all of the above.** The extractor originally returned bare
-`null`. It now returns a reason (`not_event`, `no_date`, `in_past`,
-`low_confidence`, `model_error`), which is surfaced in Settings. `not_event` in
-bulk means it's working; `no_date` in bulk means the prompt regressed.
-
-**localStorage is 5MB and the embedding cache is 9.** On web, AsyncStorage
-is localStorage, capped at ~5MB per site. Six hundred 768-float vectors
-serialize to ~9MB and the live internship list to ~1.9MB, so those writes
-failed with "exceeded the quota" - which surfaced as a console error, a
-13MB postings refetch on every reload, and an embedding cache that never
-survived a refresh. The four large, regenerable caches (embeddings, careers,
-class catalogue, groups directory) now live in IndexedDB in the browser
-(`src/state/storage.ts`); the profile, events and sync bookkeeping stay in
-localStorage, where the browser tests read them. Native builds are unchanged.
-
-**`setState` updaters don't run when you think.** Saving a profile edit with
-
-```ts
-let next; setProfile(prev => { next = {...prev, ...patch}; return next });
-await store.saveProfile(next);   // `next` is often still the initializer
-```
-
-meant Settings changes rendered correctly and then vanished on reload — and
-occasionally persisted `DEFAULT_PROFILE` over a real one, resetting
-`completedOnboarding` and bouncing the user back into onboarding. The profile
-is now mirrored into a ref that's updated eagerly, so rapid successive patches
-compose. Caught by `npm run test:notify`, which asserts against what actually
-landed in storage rather than what the screen showed.
+**Profile writes go through an eagerly-updated ref**, so tapping across a row
+of settings composes every change and each one lands in storage. `npm run
+test:notify` asserts against what was stored, not what was rendered.
 
 ## How the planner decides
 
-`priority = urgency x stakes x lanePreference`, multiplied so a zero anywhere
+`priority = urgency × stakes × lanePreference`, multiplied so a zero anywhere
 genuinely sinks an item.
 
 **Stakes** for coursework is the real thing: Canvas publishes assignment-group
 weights ("Problem Sets 25%, Exams 75%"), so an assignment's share of the final
-grade is `(points / group total) * group_weight`. That number is what decides
-what to work on — raw points are misleading across groups. When a course
-doesn't publish weights the planner falls back to kind and the row says
-*"weight not published by the course"* rather than inventing a figure.
+grade is `(points / group total) × group_weight`. When a course doesn't publish
+weights the planner falls back to kind and the row says *"weight not published
+by the course"*.
 
-**Lane preference** needed real leverage to matter. A linear multiplier was
-too compressed: "Grades first" still lost a 6%-of-grade pset to an internship
-deadline, because the application's intrinsic stakes (one-shot, 0.85)
-outweighed a 1.6x preference gap. Weights are now raised to a power, widening
-the spread to ~3.7x between extreme presets — enough for the setting to
-express a real choice without letting it override urgency.
+**Lane preference** is raised to the 1.5 power, so the gap between presets is
+several-fold rather than a compressed linear scale — enough for the setting to
+express a real choice without overriding urgency.
 
-**Effort** is a coarse estimate derived from kind and grade weight — Canvas
-has no effort field — and is labeled as an estimate everywhere it appears.
+**Effort** is a coarse estimate derived from kind and grade weight, and is
+labelled as an estimate everywhere it appears.
 
-**Work is planned to finish the day before the deadline.** Canvas due times
-are almost all 11:59pm, and the earlier rule ("anything due after 6pm can be
-worked on its due day") meant a pset due tomorrow night never appeared today.
-Now the due day is used only when the thing is due today, or as overflow when
-nothing fits earlier. Each day card also lists what is *due* that day, so
-"work on it today" and "it's due tomorrow" are both visible. Ticking a session
-records its planned hours and subtracts them from the estimate on the next
-recompute; an unticked session is simply not subtracted, so it rolls forward.
+**Work finishes the day before the deadline.** The due day itself is used
+only when the thing is due today, or as overflow when nothing fits earlier.
+Each day card lists what is *due* that day, so "work on it today" and "it's
+due tomorrow" are both visible. Ticking a session records its planned hours
+and subtracts them on the next recompute; an unticked session rolls forward.
 Ticked sessions stay on their day, struck through, so a tick can be undone.
 
-**Applications are floored at 0.4 urgency while open.** Urgency is a function
-of slack, and a posting ten days out with two hours of work has a slack of 120
-— 0.05 urgency, which no lane weight could lift above coursework. So
-"Internships first" reordered nothing measurable. Rolling postings fill as they
-go, which makes "start now" the right call regardless of the closing date; the
-floor encodes that, and the Grades-first preset's application weight was
-lowered from 0.4 to 0.3 so a far-off internship still can't edge out a
-6%-of-grade pset due in three days. Applications also fill forward from today
-rather than backward from the deadline, and one closing beyond the two-week
-horizon still gets its first week of work placed.
+**Applications are floored at 0.4 urgency while open**, because rolling
+postings fill as they go and starting now is the right call whatever the
+closing date. They fill forward from today rather than backward from the
+deadline, and one closing beyond the two-week horizon still gets its first
+week of work placed, with the closing date on the row. The Grades-first
+preset's application weight of 0.3 keeps a 6%-of-grade pset due in three
+days above a far-off internship.
 
-Overdue *coursework* stays in the plan (late submission is usually possible).
-Overdue *events* drop out: you cannot retroactively attend a club meeting, and
-one sitting at the top of "Today" pushes real work off screen.
-
-Class meetings are the one thing that appears on the **Calendar** but never in
-**Due** or **Plan** — a lecture is your schedule, not something you owe.
+Overdue *coursework* stays in the plan, since late submission is usually
+possible; past events leave it. Class meetings appear on the **Calendar** and
+nowhere else — a lecture is your schedule, not something you owe.
 
 ## Swapping the local model
 
-The extraction model is a config value, not a constant — change it in
-Settings → Local model → *Extraction model*, or pass `--model=` to any script:
+The extraction model is a config value: change it in Settings → Local model →
+*Extraction model*, or pass `--model=` to any script:
 
 ```bash
 npm run debug:extract -- --model=qwen3.5:9b   # per-message output + timings
@@ -338,217 +313,153 @@ Measured on the fixture set (M-series Mac, Sept 2026):
 | `qwen3:4b` | ~2.2s | 5/5 | all correct |
 | `gemma3:12b-it-qat` | 6.4–11.5s | 5/5 | identical |
 
-Every model that fits gets the fixture set right, so this is a speed choice,
-not an accuracy one — `qwen3:4b` is the fastest thing that still scores 5/5
-and remains a good pick on a slower machine. Benchmark before committing: the
-app's failure mode with a weaker model is *missing* events (it drops anything
-it can't date confidently), not wrong ones.
+Every model that fits scores 5/5, so this is a speed choice: `qwen3:4b` is the
+fastest and a good pick on a slower machine. Two setup notes: the client sends
+`think: false` so reasoning models stay fast, and `qwen3.5:9b` and
+`gemma4:12b` want Ollama 0.34 or newer (`qwen3.5:9b` runs on 0.34.2).
 
-Two things to know:
+## How career fit works
 
-- **Reasoning models must have `think` off.** On qwen3:4b, leaving it on took
-  a single extraction from 1.3s to 45-75s *and* made it worse. The client
-  sends `think: false` by default; if you point it at a reasoning model via
-  some other server, replicate that.
-- **Newer models need a newer Ollama.** `gemma4:12b` and `qwen3.5:9b` both
-  refused to pull on Ollama 0.12.6 with *"requires a newer version of
-  Ollama"*. Resolved by upgrading: `qwen3.5:9b` pulls and runs on 0.34.2,
-  which is why it's now the default. If you're on an older Ollama, upgrade it
-  or set the model back to `qwen3:4b` in Settings.
-- **MLX builds don't run in Ollama.** `mlx-community/...-4bit` models are
-  safetensors; Ollama loads GGUF. MLX needs `mlx-lm` or LM Studio, and
-  LM Studio speaks the OpenAI-compatible API rather than `/api/chat`, so
-  `src/llm/ollama.ts` would need a second adapter.
+Four signals decide what surfaces, and the UI labels each one:
 
-## What the career filters can and can't do
+- **Year.** The feed carries a `degrees` array on ~88% of postings, so
+  PhD-only and MBA-only roles are marked for an undergraduate, and postings
+  whose *earliest* term falls after your graduation are excluded. A posting
+  offering both Summer 2026 and 2027 stays eligible for a 2026 grad.
+- **Classes.** MIT course numbers are systematic (6.x = EECS, 18.x = math,
+  8.x = physics), so Canvas enrollment maps deterministically to subjects;
+  common letter prefixes (CS, ECE, MATH) are covered for other schools.
+- **Resume.** Skills are widened into the domains postings actually name
+  (`pytorch` → machine learning), since the feed carries titles and categories.
+  Extraction runs on your own Ollama and the resume text never leaves the
+  device.
+- **School.** Gates school-restricted curated programs (MIT UROP) and adds a
+  "near your campus" boost.
 
-The four fit signals are not equally strong, and the UI says which is which
-rather than implying uniform precision:
-
-- **Year** — strong. The feed carries a real `degrees` array on ~88% of
-  postings, so PhD-only (260 of them) and MBA-only roles are marked
-  ineligible for an undergrad, and postings whose *earliest* term falls after
-  your graduation are excluded. A posting offering both Summer 2026 and 2027
-  stays eligible for a 2026 grad.
-- **Classes** — decent. MIT course numbers are systematic (6.x = EECS,
-  18.x = math, 8.x = physics), so Canvas enrollment maps deterministically to
-  subjects; common letter prefixes (CS, ECE, MATH) are covered for other
-  schools.
-- **Resume** — decent, but only after expansion. Raw skills match almost
-  nothing: measured against the live feed, `pytorch` appears in **0** of
-  4,394 titles, because the feed carries titles and categories and no
-  descriptions. Skills are therefore widened into the domains that do appear
-  (`pytorch` → machine learning). Extraction runs on your own Ollama and the
-  resume text never leaves the device.
-- **School** — weak, and labeled as such in-app. The feed has **no**
-  per-school eligibility field, because nearly every internship accepts any
-  school. It only gates genuinely school-restricted curated programs (MIT
-  UROP) and adds a small "near your campus" boost.
-
-Ineligible postings are **dimmed and labeled, never deleted** — the
-eligibility data is imperfect, and silently hiding a job someone could have
-gotten is the worse error. "Eligible only" is a filter you choose.
+Ineligible postings are **dimmed and labelled, never deleted**, and "Eligible
+only" is a filter you choose.
 
 ## A note on grades
 
-The Work tab reports percentages and never letter grades. MIT cutoffs vary by
-class and are routinely curved, so turning 88% into "B+" would be a confident
-guess about something the app cannot know.
-
-The distinction that matters most is between *submitted* and *graded*. Canvas
-returns `score: null` for work nobody has marked yet, and averaging that in as
-a zero would tell a student they're failing a class they aren't. Only
-`workflow_state: graded` counts. A genuinely missing assignment — which Canvas
-reports as score 0 with `missing: true` — is a real zero and is shown as one.
+The Work tab reports percentages, never letter grades: MIT cutoffs vary by
+class and are routinely curved. Only `workflow_state: graded` counts toward an
+average — Canvas returns `score: null` for work nobody has marked yet, and
+that is shown as pending, not as a zero. A genuinely missing assignment, which
+Canvas reports as score 0 with `missing: true`, is shown as the zero it is.
 
 ## Layout
 
 ```
 src/
-  core/         domain model, the two-lane split, date resolution
-  connectors/   canvas, outlook, mit (campus feeds), hydrant — fixture + live impls
+  core/         domain model, the two-lane split, date resolution, attendance rule
+  connectors/   canvas, outlook, mit (campus feeds), clubs (followed clubs), hydrant
   fixtures/     recorded payloads in the real API shapes
   llm/          ollama client, extraction schema and prompts
-  ranking/      embeddings, interest scoring
+  ranking/      embeddings, interest and audience scoring
+  plan/         priority, day scheduling, preset suggestions, calendar grid
+  search/       query intent, OpenAlex, Engage directory, calendar.mit.edu directories
+  careers/      SimplifyJobs feed, curated programs, eligibility, faculty set
+  chat/         the assistant's actions and prompt
   notify/       notification planning (pure) and Expo scheduling
-  state/        local persistence + app store
-  app/          onboarding wizard, Due / Plan / Calendar / For you / Careers / Work / Settings
-scripts/        headless pipeline, extraction debugger, calibration, screenshots
+  state/        local persistence (IndexedDB on web) + app store
+  components/   UI kit, cards, search results, brand
+  app/          onboarding, Due / Plan / Calendar / For you / Careers / Work / Settings
+assets/brand/   the Scanvas mark as SVG; `npm run brand` renders the PNGs
+public/         favicons served by the web build
+scripts/        headless pipeline, tests, calibration, screenshots, proxy
 ```
 
-## Real data vs sample data
+## Connecting your accounts
 
 Every connector ships two implementations behind one interface — a `*Fixture`
 replaying recorded payloads, and a `*Live` written against the real API.
-`buildRegistry()` picks per source, at runtime, based on whether credentials
-exist. There's no code change and no rebuild: connect Canvas and Canvas goes
-live while everything else keeps replaying samples.
+`buildRegistry()` picks per source at runtime based on whether credentials
+exist: connect Canvas and Canvas goes live while everything else keeps
+replaying samples, with no rebuild.
 
 **Canvas** — Settings → Accounts. Paste your Canvas address and a personal
 access token (Canvas → Account → Settings → New Access Token). The app
-verifies it and shows you your own name and course list before trusting it,
-then adopts your real enrollment as the tracked course list. The token is
-stored in the device keychain via `expo-secure-store`.
-
-On the **phone** this just works. In a **browser** it cannot: Canvas sends no
-CORS headers, so the browser refuses to read the response no matter how valid
-the token is. For web demos, run the bundled helper in a second terminal:
-
-```bash
-npm run proxy      # localhost:8788, forwards to Canvas with CORS headers
-```
-
-The web build finds it automatically and the connect screen tells you if it
-isn't running. The proxy binds to 127.0.0.1 only, forwards solely to
-Canvas-shaped hostnames, and never logs the Authorization header.
+verifies it and shows your own name and course list before trusting it, then
+adopts your real enrollment as the tracked course list. The token is stored in
+the device keychain via `expo-secure-store`. In a browser, Canvas goes through
+the bundled proxy (`npm run proxy`), which binds to 127.0.0.1 only, forwards
+to Canvas, Outlook published-calendar hosts and `*.mit.edu`, and never logs
+the Authorization header. The connect screen tells you if it isn't running.
 
 **Outlook** — two routes, because school tenants differ:
 
-*Route A: published calendar link (works when consent is admin-blocked, as at
-MIT).* Outlook web → gear → Calendar → Shared calendars → Publish a calendar
-("Can view all details") → copy the **ICS** link and paste it in Settings →
-Accounts. Long-lived, no token, no approval. Calendar only — classes and
-meetings sync, mailing-list events can't come through a calendar link. The
-app parses the feed itself (`src/core/ics.ts`), expanding WEEKLY/DAILY
-recurrences (class schedules) and honoring EXDATE cancellations; exotic RRULEs
-fall back to the first instance rather than being expanded wrong. Treat the
-URL as a secret — anyone holding it can read the calendar.
+*Route A: published calendar link.* Outlook web → gear → Calendar → Shared
+calendars → Publish a calendar ("Can view all details") → copy the **ICS**
+link and paste it in Settings → Accounts. Long-lived, no token, no approval,
+and it works where consent is admin-controlled, as at MIT. Classes and
+meetings sync from it. The app parses the feed itself (`src/core/ics.ts`),
+expanding WEEKLY/DAILY recurrences and honouring EXDATE cancellations. Treat
+the URL as a secret — anyone holding it can read the calendar.
 
-*Route B:* paste a Microsoft Graph access token.
-Get one from [Graph Explorer](https://developer.microsoft.com/en-us/graph/graph-explorer):
+*Route B: Microsoft Graph access token*, which adds mailing lists. Get one from
+[Graph Explorer](https://developer.microsoft.com/en-us/graph/graph-explorer):
 sign in with your school account, run `GET /me/messages?$top=1` and
-`GET /me/events?$top=1` from the request bar — each fails once, then the
-**Modify permissions** tab lets you Consent to `Mail.Read` / `Calendars.Read`;
-re-run until both return JSON. Only then copy the token from the **Access
-token** tab (earlier copies lack the just-consented scopes). If Consent says
-"Need admin approval", your tenant blocks Route B entirely — use Route A.
-Graph sends CORS headers, so this works in the browser with no proxy. The
-catch: Graph Explorer tokens **expire after ~1 hour** — great for demos, not
-a daily driver. A permanent connection needs an Azure AD app registration
-with those two delegated scopes and a proper OAuth flow; the connector code
-doesn't change, only where the token comes from.
+`GET /me/events?$top=1`, use the **Modify permissions** tab to consent to
+`Mail.Read` / `Calendars.Read`, re-run until both return JSON, then copy the
+token from the **Access token** tab. Graph sends CORS headers, so this works in
+the browser with no proxy. Graph Explorer tokens last about an hour; a
+permanent connection is an Azure AD app registration with those two delegated
+scopes, and only where the token comes from changes.
 
-**MIT campus listings** need no account and are live from the first sync.
-There used to be an "MIT ELx" entry under Accounts with a live/sample toggle;
-it was removed because there is no ELx account to connect — the Experiential
-Learning Exchange (elx.mit.edu, where UROP postings now live) sits behind
-Touchstone login and exposes no feed. What MIT publishes openly is read
-instead (`src/connectors/mit.ts`), from two feeds that fail independently:
+**MIT campus listings** need no account and are live from the first sync
+(`src/connectors/mit.ts`). Three feeds, each loading independently:
 
-- **MIT Events Calendar** — calendar.mit.edu is a Localist site with a public
-  JSON API (`/api/2/events`) that **sends CORS headers**, so it works in the
-  browser with no proxy. ~400 events a month across every department, each
-  with a plain-text description and typed categories (Conferences/Seminars/
-  Lectures, Career Development, Thesis defense, Meetings/Gatherings, …), so
-  classification is deterministic and the interest matcher has real text.
-- **MIT Engage** — the club-events platform's official iCal at
-  `https://engage.mit.edu/ical/mit/ical_mit.ics`. Titles, times, rooms; **no
-  descriptions or categories**, so ranking works from the title alone.
-  Browsers need `npm run proxy` for it; the phone fetches it directly.
+- **MIT Events Calendar** — calendar.mit.edu's public JSON API
+  (`/api/2/events`) sends CORS headers, so it works in the browser directly.
+  About 400 events a month across every department, each with a plain-text
+  description, typed categories (Conferences/Seminars/Lectures, Career
+  Development, Thesis defense, Meetings/Gatherings, …), an audience tag and a
+  theme tag, so classification is deterministic and the interest matcher has
+  real text.
+- **MIT Engage iCal** — the club platform's campus feed at
+  `engage.mit.edu/ical/mit/ical_mit.ics`, about 160 club events with the
+  hosting club named on each.
+- **MIT Engage RSS** — the same platform's richer cut: club name and type,
+  topics, a full description, and whether food is provided. Dedupe merges what
+  each feed knew about the same event.
 
-If one feed fails the other still loads and the failure is reported as a
-warning in Settings → What synced and on the For you tab; if both fail the
-source errors rather than returning an empty list that looks like a quiet
-campus. Mute the source under "What synced" like any other.
+Each feed reports its status in Settings → What synced, and the source can be
+muted there like any other.
 
-The same calendar's **groups** and **departments** directories
-(`/api/2/groups`, `/api/2/departments`) back the search bar's clubs and labs
-results, and its `/api/2/events/search` backs the live event search. The
-**subject listing** comes from Hydrant's `latest.json`, which carries the
-instructor (`inCharge`, printed as "M. Kaashoek") and description for every
-class this term; the app keeps instructors and a 220-character description
-in its cached catalogue. Instructor matching is surname plus first initial —
-a surname alone is never enough (three Williamses teach this term) — with an
-explicit `listedAs` override where the printed initial differs from the name
-people use. **Engage's club directory** (`engage.mit.edu/club_signup?search=`) is the one
-place the app reads HTML: it lists every recognised student group and has no
-JSON API. The parser (`src/search/engage.ts`) is confined to search results,
-labelled as such, and returns nothing if the markup changes - the card then
-falls back to a link to that same page. **OpenAlex** (`api.openalex.org`) is
-public, CORS-enabled and needs no key; MIT is institution `I63966007`. What is
-still **not** searchable: the MIT people directory, whose old public lookup
-now redirects to a login-gated search.
+**Clubs you follow** add their own feeds (`src/connectors/clubs.ts`). Each
+club is looked up once in Engage's directory for its id and website; every
+sync then reads its per-club iCal (`/ical/mit/ical_club_<id>.ics`) and scans
+its website for dated notices, which go to the local model like an email.
 
-**Slack** was removed at the user's request. The connector, fixtures, and
-credential slot are gone rather than left dormant — the only trace left is a
-migration that drops a stored `slack` source id on load
-(`src/state/storage.ts`), so an old profile still boots.
+**Search sources.** The calendar's **groups** and **departments** directories
+(`/api/2/groups`, `/api/2/departments`) back the clubs and labs results, and
+`/api/2/events/search` backs the live event search. The **subject listing**
+comes from Hydrant's `latest.json`, which carries the instructor (`inCharge`,
+printed as "M. Kaashoek") and description for every class this term; the app
+keeps instructors and a 220-character description in its cached catalogue,
+and matches instructors on surname plus first initial, with a `listedAs`
+override where the printed initial differs from the name people use.
+**Engage's club directory** (`engage.mit.edu/club_signup?search=`) lists all
+514 recognised groups with category, website, mission and officers.
+**OpenAlex** (`api.openalex.org`) is public, CORS-enabled and needs no key; MIT
+is institution `I63966007`.
 
-One trap worth knowing if you add a connector: `canvas-transport` detects the
-browser via `typeof document`, **not** React Native's `Platform`. Importing
-`react-native` there made the module unloadable from Node, which silently
-broke every headless script the moment a connector started importing it.
+A note for adding a connector: `canvas-transport` detects the browser via
+`typeof document` rather than React Native's `Platform`, which keeps every
+connector loadable from Node so the headless scripts keep working.
 
-### Honesty rules
+### Data rules
 
-Two of these were added after sample data got mistaken for real data:
-
-- Any screen showing sample coursework carries a banner saying so. A quiet
-  note in Settings is not enough when the numbers look plausible.
-- A source is only reported as "live" when it's genuinely configured. ELx
-  originally reported `isConfigured: () => true` because public listings need
-  no auth — so the UI claimed live data while the scrape silently returned
-  nothing.
+- Any screen showing sample coursework carries a banner saying so, where the
+  numbers are.
+- A source is reported as "live" only when it is genuinely configured; public
+  feeds with no account are live by definition and report their status per
+  feed.
 - Onboarding never prefills the sample course roster once Canvas is connected,
   and labels it as samples when it isn't.
-- Connecting Canvas adopts your real enrollment, and if a saved course list
-  matches nothing that synced it is treated as stale and filtering is skipped.
-  Otherwise a leftover sample roster silently hid an entire real semester.
-
-## Known limits
-
-- The extraction model is ~4B and occasionally misreads an ambiguous time
-  (one fixture's "7pm" came back as 9pm). A larger model fixes it at the cost
-  of sync speed; the model is configurable in Settings.
-- Recurring events aren't expanded — each announcement becomes one entry.
-- Notifications are capped at 60 pending (iOS drops the rest), obligations
-  first. The count that got cut is reported rather than hidden.
-- Simulators never deliver local notifications. Test on a real device.
-- **The web build never fires a notification.** Planning is pure
-  (`src/notify/rules.ts`) and runs everywhere, which is why Settings can show
-  "would fire N reminders" in a browser; but scheduling goes through
-  `expo-notifications`, whose web module has no scheduler, so every
-  `scheduleNotificationAsync` call throws and is swallowed per-notification.
-  Settings says so on web. Real reminders need the phone app (Expo Go on a
-  device). A browser fallback would mean the Web Notifications API plus timers
-  while the tab is open, or a service worker for background delivery.
+- Connecting Canvas adopts your real enrollment, and a saved course list that
+  matches nothing that synced is treated as stale, so filtering steps aside
+  rather than hiding a semester.
+- Contact details are never fabricated: pages are verified to resolve, emails
+  appear only where published by their owner, and search links are labelled as
+  searches.
