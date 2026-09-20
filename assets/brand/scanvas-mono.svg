@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Android monochrome layer: the glyph alone, white, no tile. -->
+  <g fill="none" stroke="#FFFFFF" stroke-linecap="round">
+    <g stroke-opacity="0.6" stroke-width="40">
+      <path d="M 200 330 V 250 a 50 50 0 0 1 50 -50 H 330"/>
+      <path d="M 824 330 V 250 a 50 50 0 0 0 -50 -50 H 694"/>
+      <path d="M 200 694 V 774 a 50 50 0 0 0 50 50 H 330"/>
+      <path d="M 824 694 V 774 a 50 50 0 0 1 -50 50 H 694"/>
+    </g>
+    <path d="M 662 362 A 150 150 0 1 0 512 512 A 150 150 0 1 1 362 662" stroke-width="112"/>
+  </g>
+  <rect x="150" y="497" width="724" height="30" rx="15" fill="#FFFFFF"/>
+</svg>

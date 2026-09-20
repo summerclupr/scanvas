@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!--
+    Scanvas: Scan + Canvas. A canvas-shaped tile, a scanner's viewfinder
+    corners, and an S being read by a scan line. Accent blue is the app's
+    #2F6BFF; the gradient deepens toward indigo so the white glyph carries.
+  -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3D7BFF"/>
+      <stop offset="1" stop-color="#4A38E8"/>
+    </linearGradient>
+    <linearGradient id="beam" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0"/>
+      <stop offset="0.18" stop-color="#FFFFFF" stop-opacity="0.95"/>
+      <stop offset="0.82" stop-color="#FFFFFF" stop-opacity="0.95"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-300%" width="140%" height="700%">
+      <feGaussianBlur stdDeviation="22"/>
+    </filter>
+  </defs>
+  <rect width="1024" height="1024" rx="224" fill="url(#bg)"/>
+  <!-- viewfinder corners -->
+  <g fill="none" stroke="#FFFFFF" stroke-opacity="0.42" stroke-width="40" stroke-linecap="round">
+    <path d="M 200 330 V 250 a 50 50 0 0 1 50 -50 H 330"/>
+    <path d="M 824 330 V 250 a 50 50 0 0 0 -50 -50 H 694"/>
+    <path d="M 200 694 V 774 a 50 50 0 0 0 50 50 H 330"/>
+    <path d="M 824 694 V 774 a 50 50 0 0 1 -50 50 H 694"/>
+  </g>
+  <!-- the S: two 270-degree arcs -->
+  <path d="M 662 362 A 150 150 0 1 0 512 512 A 150 150 0 1 1 362 662"
+        fill="none" stroke="#FFFFFF" stroke-width="112" stroke-linecap="round"/>
+  <!-- scan line, with glow -->
+  <rect x="150" y="494" width="724" height="36" rx="18" fill="#BFD4FF" opacity="0.9" filter="url(#glow)"/>
+  <rect x="150" y="497" width="724" height="30" rx="15" fill="url(#beam)"/>
+</svg>
