@@ -7,8 +7,8 @@
  * In a browser it cannot work directly: Canvas sends no CORS headers, so the
  * browser blocks reading the response no matter what the token is. The web
  * build therefore routes through the little local proxy in
- * `scripts/canvas-proxy.ts` (`npm run proxy`). This is a development and demo
- * convenience; the shipped product is the phone app.
+ * `scripts/canvas-proxy.ts` (`npm run proxy`), which forwards to Canvas,
+ * Outlook published-calendar hosts and any *.mit.edu site.
  */
 
 /** Override with EXPO_PUBLIC_CANVAS_PROXY if you moved the proxy. */
